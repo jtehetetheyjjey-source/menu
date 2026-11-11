@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartMenu</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0f0c0a;--card:#1b1613;--line:#33291f;--gold:#d9ae5f;--gold2:#f1d48f;--text:#f6efe5;--muted:#a79a8a;--red:#c8483a;--serif:Georgia,"Times New Roman",serif}
+body{font-family:system-ui,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.45;padding-bottom:60px}
+button{font:inherit;cursor:pointer;border:0;color:inherit;background:none}
+.hero{position:relative;height:270px;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;text-align:center;padding:24px;
+background:linear-gradient(to top,var(--bg) 4%,rgba(15,12,10,.55) 65%,rgba(15,12,10,.75)),url("https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=900") center/cover #2a231d}
+.langs{position:absolute;top:14px;right:14px;display:flex;gap:4px;background:rgba(0,0,0,.55);padding:4px;border-radius:999px;backdrop-filter:blur(6px)}
+.langs button{padding:6px 12px;border-radius:999px;font-size:13px;font-weight:600;color:var(--muted)}
+.langs button.on{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a1410}
+.hello{color:var(--gold);letter-spacing:5px;font-size:11px;text-transform:uppercase}
+.logo{font-family:var(--serif);font-size:40px;letter-spacing:4px;margin:4px 0}
+.logo span{color:var(--gold);font-style:italic}
+.orn{display:flex;align-items:center;gap:10px;color:var(--gold);font-size:12px}
+.orn::before,.orn::after{content:"";width:50px;height:1px;background:linear-gradient(90deg,transparent,var(--gold))}
+.orn::after{transform:scaleX(-1)}
+
+.bar{position:sticky;top:0;z-index:20;background:rgba(15,12,10,.94);backdrop-filter:blur(10px);padding:12px 16px 8px;border-bottom:1px solid var(--line)}
+.search{width:100%;padding:12px 18px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit;outline:none}
+.search:focus{border-color:var(--gold)}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 0 4px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:0 0 auto;padding:8px 18px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:14px;white-space:nowrap}
+.tabs button.on{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a1410;border-color:var(--gold);font-weight:700}
+.adminbar{display:flex;gap:8px;flex-wrap:wrap;padding:8px 0 4px}
+.adminbar[hidden]{display:none}
+.adminbar button{padding:8px 14px;border-radius:10px;background:var(--card);border:1px solid var(--gold);color:var(--gold);font-size:13px}
+.adminbar .add{background:var(--gold);color:#1a1410;font-weight:700}
+
+main{max-width:980px;margin:0 auto;padding:18px 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden;text-align:left;display:flex;flex-direction:column;animation:up .4s both;transition:.2s}
+.card:hover{border-color:var(--gold);transform:translateY(-3px)}
+.pic{position:relative}
+.pic img{width:100%;height:135px;object-fit:cover;display:block;background:#2a231d}
+.badges{position:absolute;top:8px;left:8px;display:flex;gap:4px;flex-wrap:wrap}
+.b{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.72)}
+.b.new{background:var(--gold);color:#1a1410}
+.edit{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:50%;background:var(--gold);color:#1a1410;display:grid;place-items:center;font-size:15px}
+.info{padding:11px 13px 13px;display:flex;flex-direction:column;gap:4px;flex:1}
+.info h3{font-family:var(--serif);font-size:16px;font-weight:600}
+.info p{font-size:12px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+.price{color:var(--gold2);font-weight:800;font-size:18px;margin-top:4px}
+.price small{font-size:12px;font-weight:500;color:var(--muted)}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:40px 0}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+
+.modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;justify-content:center}
+.modal[hidden]{display:none}
+.wrap{position:relative;width:100%;max-width:540px}
+.sheet{background:var(--card);border-radius:24px 24px 0 0;overflow-y:auto;max-height:92vh;animation:up .25s both}
+.sheet>.pic img{height:260px}
+.in{padding:20px 22px 28px}
+.in h2{font-family:var(--serif);font-size:26px;margin-bottom:4px}
+.in .d{color:var(--muted);margin:10px 0 14px}
+.meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.meta span{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:7px 13px;font-size:13px}
+.in .price{font-size:28px}
+.x{position:absolute;top:12px;right:12px;z-index:2;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,.7);font-size:17px}
+form label{display:block;font-size:12px;color:var(--gold);margin:12px 0 4px;letter-spacing:1px;text-transform:uppercase}
+form input,form select,form textarea{width:100%;padding:11px 13px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font:inherit}
+form textarea{min-height:64px;resize:vertical}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.chk{display:flex;gap:8px;flex-wrap:wrap}
+.chk label{display:flex;align-items:center;gap:6px;margin:0;text-transform:none;letter-spacing:0;color:var(--text);font-size:14px;border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+.chk input{width:auto}
+.prev{width:100%;height:150px;object-fit:cover;border-radius:12px;margin-top:8px;background:#2a231d}
+.btns{display:flex;gap:10px;margin-top:20px}
+.btns button{flex:1;padding:14px;border-radius:12px;font-weight:700}
+.save{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#1a1410}
+.del{background:var(--red)}
+footer{text-align:center;color:var(--muted);font-size:12px;margin-top:34px}
+footer button{color:var(--muted);font-size:12px;margin-top:6px;text-decoration:underline}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="langs" id="langs"><button data-l="tg">TJ</button><button data-l="ru">RU</button><button data-l="en">EN</button></div>
+  <div class="hello" id="hello"></div>
+  <div class="logo">Smart<span>Menu</span></div>
+  <div class="orn">✦</div>
+</header>
+<div class="bar">
+  <input class="search" id="search" type="search" autocomplete="off">
+  <nav class="tabs" id="tabs"></nav>
+  <div class="adminbar" id="adminbar" hidden>
+    <button class="add" id="b-add">＋ Хӯрок</button>
+    <button id="b-copy">Нусха</button>
+    <button id="b-paste">Ворид</button>
+    <button id="b-reset">Аслӣ</button>
+    <button id="b-out">Баромад</button>
+  </div>
+</div>
+<main><section class="grid" id="grid"></section></main>
+<footer>SMARTMENU © 2026<br><button id="b-admin">Admin</button></footer>
+<div class="modal" id="modal" hidden><div class="wrap"><button class="x" id="close">✕</button><div class="sheet" id="sheet"></div></div></div>
+
+<script>
+"use strict";
+var ADMIN_PASS = "1234"; /* ← РАМЗРО ИВАЗ КУНЕД */
+
+var UI={
+ tg:{all:"Ҳама",hello:"Хуш омадед",search:"Ҷустуҷӯи хӯрок...",cur:"сомонӣ",empty:"Ҳеҷ чиз ёфт нашуд",w:"Вазн",k:"Калория",halal:"Ҳалол",spicy:"Тунд",new:"Нав",veg:"Вегетарианӣ"},
+ ru:{all:"Все",hello:"Добро пожаловать",search:"Поиск блюд...",cur:"сомони",empty:"Ничего не найдено",w:"Вес",k:"Калории",halal:"Халяль",spicy:"Острое",new:"Новинка",veg:"Вегетарианское"},
+ en:{all:"All",hello:"Welcome",search:"Search dishes...",cur:"TJS",empty:"Nothing found",w:"Weight",k:"Calories",halal:"Halal",spicy:"Spicy",new:"New",veg:"Vegetarian"}};
+var UNIT={g:{tg:"гр",ru:"г",en:"g"},ml:{tg:"мл",ru:"мл",en:"ml"}};
+var CATS=[
+ {id:"food",n:{tg:"🍲 Хӯрокҳо",ru:"🍲 Блюда",en:"🍲 Mains"}},
+ {id:"salad",n:{tg:"🥗 Салатҳо",ru:"🥗 Салаты",en:"🥗 Salads"}},
+ {id:"drink",n:{tg:"🥤 Нӯшокиҳо",ru:"🥤 Напитки",en:"🥤 Drinks"}}];
+var TAGS=["halal","spicy","new","veg"];
+var DEFAULT=[
+ {id:1,c:"food",p:35,w:350,u:"g",k:620,tags:["halal","new"],img:"https://images.unsplash.com/photo-1512058564366-18510be2db19?w=700",
+  n:{tg:"Палави тоҷикӣ",ru:"Таджикский плов",en:"Tajik Plov"},d:{tg:"Палави анъанавӣ бо гӯшти гӯсфанд, сабзӣ ва нахӯд.",ru:"Традиционный плов с бараниной, морковью и нутом.",en:"Traditional pilaf with lamb, carrots and chickpeas."}},
+ {id:2,c:"food",p:25,w:250,u:"g",k:480,tags:["halal"],img:"https://images.unsplash.com/photo-1544025162-d76694265947?w=700",
+  n:{tg:"Шашлик",ru:"Шашлык",en:"Shashlik"},d:{tg:"Шашлики болаззат аз гӯшти тару тоза бар оташ.",ru:"Сочный шашлык из свежего мяса на углях.",en:"Juicy charcoal-grilled skewers of fresh meat."}},
+ {id:3,c:"salad",p:15,w:200,u:"g",k:120,tags:["veg"],img:"https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=700",
+  n:{tg:"Салати сабзавот",ru:"Овощной салат",en:"Vegetable Salad"},d:{tg:"Салати тару тоза аз сабзавоти фасл.",ru:"Свежий салат из сезонных овощей.",en:"Fresh salad of seasonal vegetables."}},
+ {id:4,c:"drink",p:8,w:500,u:"ml",k:210,tags:[],img:"https://images.unsplash.com/photo-1554866585-cd94860890b7?w=700",
+  n:{tg:"Кока-Кола",ru:"Кока-Кола",en:"Coca-Cola"},d:{tg:"Нӯшокии хунук ва тароватбахш.",ru:"Охлаждённый освежающий напиток.",en:"Chilled refreshing soft drink."}}];
+
+var LANGS=["tg","ru","en"], KEY="sm-items", PH="data:image/svg+xml;utf8,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400"><rect width="100%" height="100%" fill="#2a231d"/><text x="50%" y="50%" font-size="60" text-anchor="middle" dominant-baseline="middle">🍽</text></svg>');
+var $=function(i){return document.getElementById(i)};
+function clone(x){return JSON.parse(JSON.stringify(x))}
+function ok(i){return i&&typeof i.p==="number"&&i.n&&i.d&&CATS.some(function(c){return c.id===i.c})}
+function loadItems(s){try{var a=JSON.parse(s||localStorage.getItem(KEY));if(Array.isArray(a)&&a.every(ok))return a}catch(e){}return null}
+var items=loadItems()||clone(DEFAULT);
+function persist(){try{localStorage.setItem(KEY,JSON.stringify(items));return true}catch(e){alert("Хотира пур шуд. Аксҳои хурдтар истифода баред.");return false}}
+function startLang(){try{var s=localStorage.getItem("sm-lang");if(LANGS.indexOf(s)>-1)return s}catch(e){}var n=(navigator.language||"").slice(0,2).toLowerCase();return LANGS.indexOf(n)>-1?n:"tg"}
+var lang=startLang(),cat="all",q="",admin=false;
+try{admin=sessionStorage.getItem("sm-admin")==="1"}catch(e){}
+
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
+function pic(src,alt){var i=el("img");i.src=src||PH;i.alt=alt||"";i.loading="lazy";i.onerror=function(){i.onerror=null;i.src=PH};return i}
+function money(n){return String(Math.round(n*100)/100)}
+function badges(it){var b=el("div","badges");(it.tags||[]).forEach(function(t){b.appendChild(el("span","b"+(t==="new"?" new":""),UI[lang][t]))});return b}
+function priceEl(it){var p=el("div","price",money(it.p)+" ");p.appendChild(el("small","",UI[lang].cur));return p}
+function tx(o){return o[lang]||o.tg||o.ru||o.en||""}
+
+function render(){
+ var t=UI[lang];document.documentElement.lang=lang;
+ $("hello").textContent=t.hello;$("search").placeholder=t.search;$("adminbar").hidden=!admin;
+ document.querySelectorAll("#langs button").forEach(function(b){b.classList.toggle("on",b.dataset.l===lang)});
+ var tabs=$("tabs");tabs.innerHTML="";
+ [{id:"all",n:{tg:t.all,ru:t.all,en:t.all}}].concat(CATS).forEach(function(c){
+  var b=el("button",c.id===cat?"on":"",c.n[lang]);b.onclick=function(){cat=c.id;render()};tabs.appendChild(b)});
+ var g=$("grid");g.innerHTML="";
+ var list=items.filter(function(i){return(cat==="all"||i.c===cat)&&(!q||tx(i.n).toLowerCase().indexOf(q)>-1)});
+ if(!list.length){g.appendChild(el("p","empty",t.empty));return}
+ list.forEach(function(it,idx){
+  var card=el("button","card");card.style.animationDelay=Math.min(idx*40,400)+"ms";
+  var p=el("div","pic");p.appendChild(pic(it.img,tx(it.n)));p.appendChild(badges(it));
+  if(admin)p.appendChild(el("span","edit","✎"));
+  var info=el("div","info");info.appendChild(el("h3","",tx(it.n)));info.appendChild(el("p","",tx(it.d)));info.appendChild(priceEl(it));
+  card.appendChild(p);card.appendChild(info);
+  card.onclick=function(){admin?openEditor(it):openItem(it)};
+  g.appendChild(card)});
+}
+function show(){$("modal").hidden=false;document.body.style.overflow="hidden"}
+function hide(){$("modal").hidden=true;document.body.style.overflow=""}
+function openItem(it){
+ var t=UI[lang],s=$("sheet");s.innerHTML="";
+ var top=el("div","pic");top.appendChild(pic(it.img,tx(it.n)));top.appendChild(badges(it));
+ var inn=el("div","in");inn.appendChild(el("h2","",tx(it.n)));inn.appendChild(el("p","d",tx(it.d)));
+ var m=el("div","meta");
+ if(it.w)m.appendChild(el("span","",t.w+": "+it.w+" "+UNIT[it.u||"g"][lang]));
+ if(it.k)m.appendChild(el("span","",t.k+": "+it.k+" kcal"));
+ inn.appendChild(m);inn.appendChild(priceEl(it));
+ s.appendChild(top);s.appendChild(inn);show()}
+
+/* ===== Таҳрири админ ===== */
+function compress(file,cb){
+ var r=new FileReader();
+ r.onload=function(){var im=new Image();im.onload=function(){
+  var m=800,k=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement("canvas");
+  c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);
+  c.getContext("2d").drawImage(im,0,0,c.width,c.height);cb(c.toDataURL("image/jpeg",.72))};
+  im.onerror=function(){alert("Расм хонда нашуд")};im.src=r.result};
+ r.readAsDataURL(file)}
+
+function openEditor(it){
+ var isNew=!it;it=it||{id:Date.now(),c:"food",p:"",w:"",u:"g",k:"",tags:[],img:"",n:{},d:{}};
+ var h='<div class="in"><h2>'+(isNew?"Хӯроки нав":"Таҳрир")+'</h2><form id="f">';
+ LANGS.forEach(function(l){h+='<label>Ном ('+l.toUpperCase()+')</label><input id="n-'+l+'">'});
+ LANGS.forEach(function(l){h+='<label>Тавсиф ('+l.toUpperCase()+')</label><textarea id="d-'+l+'"></textarea>'});
+ h+='<label>Категория</label><select id="c">'+CATS.map(function(c){return'<option value="'+c.id+'">'+c.n.tg+'</option>'}).join("")+'</select>';
+ h+='<div class="row"><div><label>Нарх (сомонӣ)</label><input id="p" type="number" min="0.01" step="0.01"></div><div><label>Калория</label><input id="k" type="number" min="0"></div></div>';
+ h+='<div class="row"><div><label>Вазн / ҳаҷм</label><input id="w" type="number" min="0"></div><div><label>Воҳид</label><select id="u"><option value="g">гр</option><option value="ml">мл</option></select></div></div>';
+ h+='<label>Нишонаҳо</label><div class="chk">'+TAGS.map(function(t){return'<label><input type="checkbox" value="'+t+'"> '+UI.tg[t]+'</label>'}).join("")+'</div>';
+ h+='<label>Акс аз телефон</label><input id="file" type="file" accept="image/*"><label>ё суроғаи акс (URL)</label><input id="img" type="text" placeholder="https://...">';
+ h+='<img class="prev" id="prev" alt=""><div class="btns">'+(isNew?'':'<button type="button" class="del" id="del">Нест</button>')+'<button type="submit" class="save">Сабт</button></div></form></div>';
+ $("sheet").innerHTML=h;
+ LANGS.forEach(function(l){$("n-"+l).value=it.n[l]||"";$("d-"+l).value=it.d[l]||""});
+ $("c").value=it.c;$("p").value=it.p;$("k").value=it.k;$("w").value=it.w;$("u").value=it.u||"g";
+ document.querySelectorAll(".chk input").forEach(function(c){c.checked=(it.tags||[]).indexOf(c.value)>-1});
+ var cur=it.img||"";$("img").value=cur.indexOf("data:")===0?"":cur;$("prev").src=cur||PH;
+ $("img").oninput=function(){cur=this.value.trim();$("prev").src=cur||PH};
+ $("file").onchange=function(){if(this.files[0])compress(this.files[0],function(d){cur=d;$("prev").src=d;$("img").value=""})};
+ if(!isNew)$("del").onclick=function(){if(confirm("Нест карда шавад?")){var old=items;items=items.filter(function(x){return x.id!==it.id});if(!persist())items=old;hide();render()}};
+ $("f").onsubmit=function(e){
+  e.preventDefault();
+  var names={},descs={},first="",fd="";
+  LANGS.forEach(function(l){var n=$("n-"+l).value.trim(),d=$("d-"+l).value.trim();names[l]=n;descs[l]=d;if(!first&&n)first=n;if(!fd&&d)fd=d});
+  var p=Number($("p").value);
+  if(!first||!(p>0)){alert("Ақаллан як ном ва нархи дуруст ворид кунед");return}
+  LANGS.forEach(function(l){names[l]=names[l]||first;descs[l]=descs[l]||fd});
+  var obj={id:it.id,c:$("c").value,p:p,w:Number($("w").value)||0,u:$("u").value,k:Number($("k").value)||0,
+   tags:Array.prototype.map.call(document.querySelectorAll(".chk input:checked"),function(c){return c.value}),img:cur,n:names,d:descs};
+  var old=items;
+  items=isNew?items.concat([obj]):items.map(function(x){return x.id===it.id?obj:x});
+  if(!persist()){items=old;return}
+  hide();render()};
+ show()}
+
+/* ===== Тугмаҳо ===== */
+$("close").onclick=hide;
+$("modal").onclick=function(e){if(e.target===$("modal"))hide()};
+document.addEventListener("keydown",function(e){if(e.key==="Escape")hide()});
+$("search").oninput=function(e){q=e.target.value.trim().toLowerCase();render()};
+document.querySelectorAll("#langs button").forEach(function(b){b.onclick=function(){lang=b.dataset.l;try{localStorage.setItem("sm-lang",lang)}catch(e){}render()}});
+$("b-admin").onclick=function(){
+ if(admin)return;
+ var v=prompt("Рамз:");
+ if(v===null)return;
+ if(v===ADMIN_PASS){admin=true;try{sessionStorage.setItem("sm-admin","1")}catch(e){}render()}else alert("Рамз нодуруст аст")};
+$("b-out").onclick=function(){admin=false;try{sessionStorage.removeItem("sm-admin")}catch(e){}render()};
+$("b-add").onclick=function(){openEditor(null)};
+$("b-copy").onclick=function(){
+ var s=JSON.stringify(items);
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(s).then(function(){alert("Нусха шуд")},function(){prompt("Нусха кунед:",s)});
+ else prompt("Нусха кунед:",s)};
+$("b-paste").onclick=function(){
+ var s=prompt("Маълумоти нусхашударо гузоред:");
+ if(!s)return;var a=loadItems(s);
+ if(!a){alert("Маълумот нодуруст аст");return}
+ var old=items;items=a;if(!persist())items=old;render()};
+$("b-reset").onclick=function(){if(confirm("Ба меню аслӣ баргардонем? Тағйирот нест мешавад.")){items=clone(DEFAULT);persist();render()}};
+render();
+</script>
+</body>
+</html>
